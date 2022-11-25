@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/style.css') }}" />
+    <title>Title</title>
+
+    <style>
+    	#video {
+    		transform: rotateY(180deg);
+    		-webkit-transform:rotateY(180deg); /* Safari and Chrome */
+    		-moz-transform:rotateY(180deg); /* Firefox */
+    		
+    	}
+    </style>
+    
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="heading">
+        <h1 style="font-size: 300%; padding-bottom: 10%; margin-bottom: 10%; padding-left: 1cm; color: rgb(255, 255, 255);">Emotion Detector</h1>
+    </div>
+
+    <div id="container">
+    <video autoplay playsinline id="videoElement"></video>
+    <canvas id="canvas"  width="400" height="300"></canvas>
+    </div>
+
+    <div id="emotion">
+    </div>
+    <div class="progress-bar" style="--width: 40" data-label=""></div>
+    <div class="progress-bar1" style="--width: 40" data-label=""></div>
+    <div class="progress-bar2" style="--width: 40" data-label=""></div>
+    <div class="progress-bar3" style="--width: 40" data-label=""></div>
+
+
+    <script type="text/javascript" charset="utf-8">
+        var neuVal = 0
+        var hapVal = 0
+        var sadVal = 0
+        var angVal = 0
+
+        var socket = io.connect(window.location.protocol + '//' + document.domain + ':' + location.port);
+        socket.on('connect', function(){
+            console.log("Connected...!", socket.connected)
+        });
+
+
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        const video = document.querySelector("#videoElement");
+
+        video.width = 400;
+        video.height = 300; 
+    
+
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function (err0r) {
+
+            });
+        }
+
+        const FPS = 5;
+        const progressBar = document.getElementsByClassName('progress-bar')[0]
+        const progressBar1 = document.getElementsByClassName('progress-bar1')[0]
+        const progressBar2 = document.getElementsByClassName('progress-bar2')[0]
+        const progressBar3 = document.getElementsByClassName('progress-bar3')[0]
+
+        setInterval(() => {
+            width=video.width;
+            height=video.height;
+            context.drawImage(video, 0, 0, width , height );
+            var data = canvas.toDataURL('image/jpeg', 0.5);
+            context.clearRect(0, 0, width,height );
+            socket.emit('image', data);
+
+            const computedStyle = getComputedStyle(progressBar)
+            const wiidth = parseFloat(computedStyle.getPropertyValue('--width')) || 0
+            progressBar.style.setProperty('--width', parseFloat(neuVal)*100)
+
+            const computedStyle1 = getComputedStyle(progressBar1)
+            const wiidth1 = parseFloat(computedStyle.getPropertyValue('--width')) || 0
+            progressBar1.style.setProperty('--width', parseFloat(hapVal)*100)
+
+            const computedStyle2 = getComputedStyle(progressBar2)
+            const wiidth2 = parseFloat(computedStyle.getPropertyValue('--width')) || 0
+            progressBar2.style.setProperty('--width', parseFloat(sadVal)*100)
+
+            const computedStyle3 = getComputedStyle(progressBar3)
+            const wiidth3 = parseFloat(computedStyle.getPropertyValue('--width')) || 0
+            progressBar3.style.setProperty('--width', parseFloat(angVal)*100)
+        }, 1000/FPS);
+
+        socket.on('response_back', function(result){
+                // console.log(result['emotion'], result['engagement']);
+                document.getElementById('emotion').innerHTML = "Emotion : " + result["emotion"] + " " + "Engagement : " + result["engagement"];
+                neuVal = result["neutral"]
+                hapVal = result["happy"]
+                sadVal = result["sad"]
+                angVal = result["anger"]
+                // const computedStyle = getComputedStyle(progressBar)
+            // const width = parseFloat(computedStyle.getPropertyValue('--width')) || 0
+            // progressBar.style.setProperty('--width', document.getElementById('neutral')*100)
+                
+        });
+
+    </script>
+
+
+ </body>
+
+</html>
