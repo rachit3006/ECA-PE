@@ -1,7 +1,7 @@
 # Emotion Recognition Website
 
 A flask-based website deployed with an emotion recognition model built in python referring to the research paper present in the repository. The website captures frames
-from user's webcam and runs the model on the captured frames to output the detected emotion of the user.
+from user's webcam and runs the model on the captured frames to output the detected emotion and engagement status (based on the emotion detected) of the user.
 
 ## Model Description
 <p>The model is built using VGGFace2-model. The output of the VGGFace2-model is passed to three more layers as follows -
@@ -32,5 +32,5 @@ the data from the FER2013 dataset containing the emotions anger, disgust, fear, 
 <li> Download the datasets and store them in a folder named 'data' with the datasets being stored in 'affectnet' and 'fer' folder inside it respectively. 
 <li> Run the affectnetEE.py file to train the model. A new 'models' folder would be formed containing the model json file and the weights file.
 </ol></p> 
-### Running the Website
-Run the process.py file and open localhost:5001 on your browser.
+<h3> Running the Website </h3>
+<p>Run the process.py file and open localhost:5001 on your browser. Allow the browser to access the webcam. The emotion detected and the engagement status would be viewed on the website.</p>
